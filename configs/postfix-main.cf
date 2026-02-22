@@ -1,0 +1,128 @@
+# ==========================================
+# Postfix Main Configuration File
+# Location: conf/postfix/main.cf
+# ==========================================
+
+# -------------------------------
+# Basic Identity
+# -------------------------------
+
+myhostname = mail.itsrighttime.group
+mydomain = itsrighttime.group
+myorigin = $mydomain
+
+inet_interfaces = all
+inet_protocols = all
+
+# -------------------------------
+# Network Settings
+# -------------------------------
+
+mydestination = $myhostname, localhost.$mydomain, localhost
+mynetworks = 127.0.0.0/8 [::1]/128
+
+# Mailbox format (Maildir)
+home_mailbox = Maildir/
+
+# Message size limit (50MB)
+message_size_limit = 52428800
+
+# -------------------------------
+# SMTP Banner Hardening
+# -------------------------------
+
+smtpd_banner = $myhostname ESMTP
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+
+# -------------------------------
+# TLS Configuration
+# -------------------------------
+
+smtpd_tls_cert_file = /etc/letsencrypt/live/mail.itsrighttime.group/fullchain.pem
+smtpd_tls_key_file = /etc/letsencrypt/live/mail.itsrighttime.group/privkey.pem
+
+smtpd_use_tls = yes
+smtpd_tls_security_level = may
+smtp_tls_security_level = may
+
+smtpd_tls_protocols = !SSLv2 !SSLv3
+smtp_tls_protocols  = !SSLv2 !SSLv3
+
+smtpd_tls_mandatory_protocols = !SSLv2 !SSLv3
+smtp_tls_mandatory_protocols  = !SSLv2 !SSLv3
+
+smtpd_tls_loglevel = 1
+smtpd_tls_received_header = yes
+
+# -------------------------------
+# SASL Authentication (Dovecot)
+# -------------------------------
+
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_authenticated_header = yes
+
+# -------------------------------
+# Relay Restrictions (ANTI OPEN RELAY)
+# -------------------------------
+
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_unauth_destination
+
+# -------------------------------
+# Additional SMTP Restrictions
+# -------------------------------
+
+smtpd_helo_required = yes
+
+smtpd_helo_restrictions =
+    reject_invalid_helo_hostname,
+    reject_non_fqdn_helo_hostname
+
+smtpd_sender_restrictions =
+    reject_non_fqdn_sender,
+    reject_unknown_sender_domain
+
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_unauth_destination,
+    reject_unknown_recipient_domain
+
+# -------------------------------
+# DKIM (OpenDKIM Milter Integration)
+# -------------------------------
+
+milter_protocol = 6
+milter_default_action = accept
+
+smtpd_milters = inet:localhost:12345
+non_smtpd_milters = inet:localhost:12345
+
+# -------------------------------
+# Performance Tuning
+# -------------------------------
+
+default_process_limit = 100
+smtpd_client_connection_count_limit = 20
+smtpd_client_connection_rate_limit = 30
+
+# -------------------------------
+# Queue Lifetime
+# -------------------------------
+
+maximal_queue_lifetime = 5d
+bounce_queue_lifetime = 1d
+
+# -------------------------------
+# Logging
+# -------------------------------
+
+maillog_file = /var/log/mail.log

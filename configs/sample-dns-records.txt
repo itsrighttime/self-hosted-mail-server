@@ -1,0 +1,118 @@
+====================================================
+Sample DNS Records for itsrighttime.group
+====================================================
+
+Domain: itsrighttime.group
+Mail Host: mail.itsrighttime.group
+Public IP: 72.60.201.63
+IPv6: 2a02:4780:12:8498::1
+
+----------------------------------------------------
+1. A Record (IPv4)
+----------------------------------------------------
+Type: A
+Name: mail
+Value: 72.60.201.63
+TTL: 3600
+
+----------------------------------------------------
+2. AAAA Record (IPv6)
+----------------------------------------------------
+Type: AAAA
+Name: mail
+Value: 2a02:4780:12:8498::1
+TTL: 3600
+
+----------------------------------------------------
+3. MX Record
+----------------------------------------------------
+Type: MX
+Name: @
+Priority: 10
+Value: mail.itsrighttime.group.
+TTL: 3600
+
+----------------------------------------------------
+4. SPF Record
+----------------------------------------------------
+Type: TXT
+Name: @
+Value:
+v=spf1 ip4:72.60.201.63 ip6:2a02:4780:12:8498::1 mx -all
+
+Explanation:
+- ip4: Allow this IPv4
+- ip6: Allow this IPv6
+- mx: Allow MX host
+- -all: Hard fail for others
+
+----------------------------------------------------
+5. DKIM Record
+----------------------------------------------------
+Type: TXT
+Name: default._domainkey
+Value:
+v=DKIM1; k=rsa; p=YOUR_PUBLIC_KEY_HERE
+
+Note:
+Replace YOUR_PUBLIC_KEY_HERE with the content from:
+
+/etc/opendkim/keys/itsrighttime.group/default.txt
+
+(Remove quotes and line breaks)
+
+----------------------------------------------------
+6. DMARC Record
+----------------------------------------------------
+Type: TXT
+Name: _dmarc
+Value:
+v=DMARC1; p=quarantine; rua=mailto:dmarc@itsrighttime.group; ruf=mailto:dmarc@itsrighttime.group; fo=1; sp=quarantine; adkim=s; aspf=s
+
+Explanation:
+- p=quarantine → suspicious mail goes to spam
+- rua → aggregate reports
+- ruf → forensic reports
+- adkim=s → strict DKIM alignment
+- aspf=s → strict SPF alignment
+
+(Production option: change p=reject after testing)
+
+----------------------------------------------------
+7. Reverse DNS (PTR) - Set via Hosting Provider
+----------------------------------------------------
+IP: 72.60.201.63
+PTR: mail.itsrighttime.group
+
+IP: 2a02:4780:12:8498::1
+PTR: mail.itsrighttime.group
+
+Important:
+PTR must match:
+- myhostname (Postfix)
+- A record
+- HELO hostname
+
+Mismatch can cause spam classification.
+
+----------------------------------------------------
+8. Optional: Autodiscover (for clients)
+----------------------------------------------------
+Type: CNAME
+Name: autodiscover
+Value: mail.itsrighttime.group.
+
+----------------------------------------------------
+9. Optional: MTA-STS (Advanced Security)
+----------------------------------------------------
+Type: TXT
+Name: _mta-sts
+Value:
+v=STSv1; id=2026022201
+
+Policy file hosted at:
+https://mta-sts.itsrighttime.group/.well-known/mta-sts.txt
+
+====================================================
+END OF SAMPLE DNS CONFIGURATION
+====================================================

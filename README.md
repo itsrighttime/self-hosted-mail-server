@@ -1,94 +1,180 @@
-# Self Hosted Mail Server (Hostinger VPS)
+# Self Hosted Mail Server (Production-Style Setup)
 
-## Overview
+## Project Overview
 
-This project demonstrates a complete end-to-end setup of a self-hosted mail server deployed on a Hostinger VPS.
+This project demonstrates the end-to-end design and deployment of a secure, self-hosted mail server running on a VPS provisioned from Hostinger.
 
-The entire mail infrastructure is configured manually without using any managed email services or third-party mail providers. All components — including mail transfer, mailbox access, DNS records, and security layers — are configured from scratch.
+The entire infrastructure is manually configured without using any managed email services (no Gmail, AWS SES, Mailgun, etc.). All components — SMTP, IMAP, authentication, DNS authentication, TLS encryption, and firewall security — are implemented from scratch.
 
-The goal of this project is to understand how real-world email systems operate at the protocol and infrastructure level.
+This project was built to:
 
----
+- Understand real-world email infrastructure
+- Strengthen backend networking fundamentals
+- Demonstrate production-grade system configuration
+- Apply system design thinking to infrastructure
 
-## Deployment Environment
 
-- VPS Provider: Hostinger
-- Operating System: Linux
-- Public IP-based deployment
-- Manual server provisioning and configuration
+### High-Level Architecture
 
----
+The mail system consists of:
 
-## Core Features
+Client (Thunderbird / Gmail / Outlook)
+↓
+SMTP (Port 587 / 465)
+↓
+Postfix (MTA)
+↓
+OpenDKIM (Email Signing)
+↓
+DNS Validation (SPF / DKIM / DMARC)
+↓
+Recipient Mail Server
 
-- SMTP configuration for sending emails
-- IMAP/POP3 setup for mail retrieval
-- Secure authentication for users
-- SSL/TLS encryption for secure communication
-- DNS configuration (MX, SPF, DKIM, DMARC)
-- Firewall configuration and port management
-- Anti-spam and mail security hardening
-- Log monitoring and troubleshooting
+For mail retrieval:
 
----
+Client → IMAPS (993) → Dovecot → Maildir Storage
 
-## Architecture Components
 
-### 1. Mail Transfer (SMTP)
-Handles outbound and inbound email routing between servers.
+### Core Components
 
-### 2. Mail Access (IMAP/POP3)
-Allows users to securely access their mailboxes.
+#### 1 Postfix – Mail Transfer Agent
 
-### 3. DNS Records
-Configured and validated:
-- MX Record
-- SPF Record
+Handles:
+
+- SMTP
+- Outbound & inbound routing
+- TLS encryption
+- SASL authentication (via Dovecot)
+- DKIM integration
+
+#### 2 Dovecot – Mail Delivery & Access
+
+Handles:
+
+- IMAP / POP3
+- User authentication
+- Maildir storage
+- Secure TLS communication
+
+#### 3 OpenDKIM – Email Signing
+
+Handles:
+
+- Outgoing email signing
+- Domain key validation
+- Spam prevention support
+
+#### 4 DNS Authentication
+
+Configured:
+
+- A / AAAA records
+- MX record
+- SPF
 - DKIM
 - DMARC
+- Reverse DNS (PTR)
 
-### 4. Security Layer
-- SSL/TLS certificates
-- Secure login authentication
-- Firewall rules
-- Restricted open ports
-- Spam protection mechanisms
 
----
+###  Security Considerations
 
-## What This Project Demonstrates
+- TLS enforced for SMTP authentication
+- IMAPS required for mailbox access
+- Firewall restricted to required ports only
+- DKIM signing enabled
+- SPF policy defined
+- DMARC reporting enabled
+- Reverse DNS configured
+- SASL authentication enabled
+- No open relay configuration
 
-- Backend infrastructure management
-- Networking protocol understanding
-- Linux server administration
-- Production-style mail server deployment
-- Debugging and mail delivery troubleshooting
-- Security-first configuration approach
 
----
+###  Documentation
 
-## Challenges Solved
+Detailed step-by-step implementation is available in the `/docs` directory:
 
-- Email delivery issues due to incorrect DNS setup
-- SPF/DKIM alignment failures
-- Port blocking and firewall conflicts
-- TLS certificate configuration errors
-- Spam classification handling
+- System Overview
+- Installation Guide
+- Configuration Files
+- DNS Setup
+- Testing & Debugging
+- Maintenance
+- Scaling & System Design
 
----
 
-## Future Improvements
+###  Testing Strategy
 
-- High availability setup
-- Mail server clustering
-- Automated deployment scripts
-- Monitoring and alerting system
-- Backup and disaster recovery configuration
+The setup includes validation for:
 
----
+- SMTP handshake
+- IMAP connection
+- TLS certificate verification
+- DKIM key lookup
+- SPF validation
+- DMARC validation
+- Mail queue inspection
+- Log monitoring
+- External delivery testing
 
-## Conclusion
 
-This project provides hands-on experience with real-world email server infrastructure deployed on a VPS environment without relying on managed mail services.
+###  System Design Perspective (SDE2 Focus)
 
-It demonstrates strong backend fundamentals, networking knowledge, and practical DevOps exposure.
+This mail server was designed with the following distributed system principles in mind:
+
+#### 1 Reliability
+
+- Service auto-start on boot
+- Log-based monitoring
+- Mail queue handling
+- TLS certificate verification
+
+#### 2 Security
+
+- Enforced encryption
+- Domain-level authentication
+- Restricted firewall rules
+- No open relay configuration
+
+#### 3 Scalability Considerations
+
+Though deployed on a single VPS, the architecture supports horizontal scaling by:
+
+- Separating MTA and mailbox servers
+- Introducing load balancer in front of SMTP
+- Using shared storage (NFS/S3-compatible)
+- Moving users to virtual database-based authentication
+- Adding replica MX servers
+- Implementing rate limiting and queue tuning
+
+#### 4 Observability
+
+- Mail logs analysis
+- Postfix queue inspection
+- Dovecot mailbox metrics
+- DNS verification testing
+
+
+### Future Improvements
+
+- High Availability (Multi-MX setup)
+- Database-backed virtual users
+- Rate limiting per user/IP
+- Spam filtering (SpamAssassin)
+- Antivirus (ClamAV)
+- Monitoring (Prometheus + Grafana)
+- Automated deployment (Ansible / Terraform)
+- Containerized deployment
+
+
+### Why This Project Matters for Backend Engineering
+
+This project demonstrates:
+
+- Deep understanding of networking protocols (SMTP, IMAP)
+- DNS architecture and email authentication
+- Linux system administration
+- Secure infrastructure configuration
+- Debugging distributed communication systems
+- Production-style system thinking
+
+
